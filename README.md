@@ -4,6 +4,7 @@
 # HOW TO USE THIS STUFF
 - You need a chromium based browser for this.
 Close all other Chrome Windows
+
 - Start up a chrome instance with the debug adapter on:
 _On Fedora Linux_
 ```
@@ -20,7 +21,7 @@ start chrome --remote-debugging-port=9222 --user-data-dir="%TEMP%\chrome-feedbac
 - Then open up the ERP and navigate to the feedback page
 - Then run the script:
 ```
-cd feedback-automation
+npm install
 node fill-feedback.js
 ```
 
