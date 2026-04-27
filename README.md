@@ -27,5 +27,12 @@ node fill-feedback.js
 
 Oh yeah, and you need node for this as well.
 
+## a note
+if you have already filled some feedbacks or only want to automate some of them, then what you can do is:
+    ```
+    node fill-feedback.js --start=X --count=Y
+    ```
+    where X is the feedback entry and Y is the number of courses to autofill.
+
 # Fixes + Feedback
 this is 350 lines of vibecoded shit and I don't like feedback. It either works or it doesn't.
