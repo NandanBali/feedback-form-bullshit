@@ -1,0 +1,7 @@
+{
+  "name": "feedback-automation",
+  "private": true,
+  "type": "commonjs",
+  "scripts": { "start": "node fill-feedback.js" },
+  "dependencies": { "playwright": "^1.49.0" }
+}
