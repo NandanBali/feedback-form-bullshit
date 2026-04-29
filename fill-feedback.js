@@ -19,22 +19,22 @@ async function findPSFrameAsync(page) {
   for (const f of candidates) {
     const has = await f.evaluate(() => {
       return !!document.querySelector('input[id^="Z_STDFED_L3_WRK_CHECKBOX1$"]')
-          || !!document.querySelector('textarea[id^="Z_STDFB_O_REPLY_DESCRLONG$"]')
-          || !!document.querySelector('input[id^="Z_STDFEED_WRK_ADD_BTN$"]');
+        || !!document.querySelector('textarea[id^="Z_STDFB_O_REPLY_DESCRLONG$"]')
+        || !!document.querySelector('input[id^="Z_STDFEED_WRK_ADD_BTN$"]');
     }).catch(() => false);
     if (has) return f;
   }
   // Fallback: frame whose URL points at the feedback components.
   return candidates.find(f => /Z_STDFB|Z_STDFEED/i.test(f.url()))
-      || candidates.find(f => f.name() === 'TargetContent' || f.name() === 'main_target_win0')
-      || null;
+    || candidates.find(f => f.name() === 'TargetContent' || f.name() === 'main_target_win0')
+    || null;
 }
 
 // Synchronous-ish version (URL-based only). Kept for backwards compat but prefer findPSFrameAsync.
 function findPSFrame(page) {
   return page.frames().find(f => /Z_STDFB|Z_STDFEED/i.test(f.url()) && !f.isDetached())
-      || page.frames().find(f => (f.name() === 'TargetContent' || f.name() === 'main_target_win0') && !/^about:/.test(f.url()))
-      || null;
+    || page.frames().find(f => (f.name() === 'TargetContent' || f.name() === 'main_target_win0') && !/^about:/.test(f.url()))
+    || null;
 }
 
 // Wait until PeopleSoft's loading indicators are hidden.
@@ -121,7 +121,7 @@ async function clickSaveAndReturn(page) {
     console.log('  Post-save dialog detected — clicking OK.');
     await ok.click({ timeout: TIMEOUT });
     // Wait until the dialog is gone before continuing.
-    await ok.waitFor({ state: 'hidden', timeout: TIMEOUT }).catch(() => {});
+    await ok.waitFor({ state: 'hidden', timeout: TIMEOUT }).catch(() => { });
     const f2 = findPSFrame(page);
     if (f2) await waitForPSReady(f2);
   } catch {
@@ -152,12 +152,13 @@ async function clickSaveAndReturn(page) {
 async function waitForSearchFrame(page, timeout = TIMEOUT) {
   const deadline = Date.now() + timeout;
   while (Date.now() < deadline) {
-    const f = findPSFrame(page);
-    if (f && !f.isDetached() && !/^about:/.test(f.url())) {
+    // Check all non-detached, non-about: frames including the main frame
+    const candidates = page.frames().filter(f => !f.isDetached() && !/^about:/.test(f.url()));
+    for (const f of candidates) {
       try {
         const ready = await f.evaluate(() => {
           return !!document.querySelector('input[id^="Z_STDFEED_WRK_ADD_BTN$"]')
-              || !!document.querySelector('select[id="$ICField100$hpage$0"]');
+            || !!document.querySelector('select[id="$ICField100$hpage$0"]');
         });
         if (ready) {
           await waitForPSReady(f);
@@ -255,8 +256,8 @@ async function main() {
   // and the actual feedback content lives in a nested iframe.
   const isFeedbackUrl = url => /Z_STDFB|Z_STDFEED/i.test(url);
   let page = allPages.find(p => p.frames().some(f => isFeedbackUrl(f.url())))
-          || allPages.find(p => isFeedbackUrl(p.url()))
-          || allPages.find(p => p.frames().some(f => f.name() === 'TargetContent'));
+    || allPages.find(p => isFeedbackUrl(p.url()))
+    || allPages.find(p => p.frames().some(f => f.name() === 'TargetContent'));
 
   if (!page) {
     console.error('\nNo Student Feedback tab found in any open Chrome tab or iframe.');
@@ -275,7 +276,7 @@ async function main() {
   const frameDeadline = Date.now() + TIMEOUT;
   while (Date.now() < frameDeadline) {
     frame = page.frames().find(f => isFeedbackUrl(f.url()))
-         || page.frames().find(f => f.name() === 'TargetContent' && !/^about:/.test(f.url()));
+      || page.frames().find(f => f.name() === 'TargetContent' && !/^about:/.test(f.url()));
     if (frame) break;
     await page.waitForTimeout(500);
   }
@@ -369,13 +370,13 @@ async function main() {
       frame = await findPSFrameAsync(page);
       const hasForm = !!frame
         && ((await frame.locator('input[id^="Z_STDFED_L3_WRK_CHECKBOX1$"]').count()) > 0
-            || (await frame.locator('textarea[id^="Z_STDFB_O_REPLY_DESCRLONG$"]').count()) > 0);
+          || (await frame.locator('textarea[id^="Z_STDFB_O_REPLY_DESCRLONG$"]').count()) > 0);
       const hasDialog = !!frame && (await frame.locator('[id="#ICOK"], [id="#ICCancel"]').count()) > 0;
 
       if (!hasForm && hasDialog) {
         console.log(`  ${subjectLabel}: dialog only (likely already filled). Dismissing.`);
         await frame.locator('[id="#ICOK"], [id="#ICCancel"]').first()
-          .click({ timeout: TIMEOUT }).catch(() => {});
+          .click({ timeout: TIMEOUT }).catch(() => { });
         await waitForPSReady(frame);
         skippedCount += 1;
       } else if (!hasForm) {
@@ -393,7 +394,7 @@ async function main() {
       try {
         if (await breadcrumb.isVisible({ timeout: 2_000 })) {
           await breadcrumb.click({ timeout: TIMEOUT });
-          await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUT }).catch(() => {});
+          await page.waitForLoadState('domcontentloaded', { timeout: TIMEOUT }).catch(() => { });
           const f2 = findPSFrame(page);
           if (f2) await waitForPSReady(f2);
         }
