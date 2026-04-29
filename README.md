@@ -18,6 +18,12 @@ _On Windows_
 ```
 start chrome --remote-debugging-port=9222 --user-data-dir="%TEMP%\chrome-feedback"
 ```
+
+if that doesn't work try
+```
+Start-Process "chrome.exe" -ArgumentList "--remote-debugging-port=9222", "--user-data-dir=$env:TEMP\chrome-feedback"
+```
+
 - Then open up the ERP and navigate to the feedback page
 - Then run the script:
 ```
